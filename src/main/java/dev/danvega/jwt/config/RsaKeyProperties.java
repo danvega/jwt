@@ -5,6 +5,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
-@ConfigurationProperties(prefix = "jwt")
-public record JwtConfigProperties(RSAPublicKey publicKey, RSAPrivateKey privateKey) {
+@ConfigurationProperties(prefix = "rsa")
+public record RsaKeyProperties(RSAPublicKey publicKey, RSAPrivateKey privateKey) {
 }
