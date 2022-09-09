@@ -20,9 +20,9 @@ public class AuthController {
 
     @PostMapping("/token")
     public String token(Authentication authentication) {
-        LOG.info("Token requested for user: '{}'", authentication.getName());
+        LOG.debug("Token requested for user: '{}'", authentication.getName());
         String token = tokenService.generateToken(authentication);
-        LOG.info("Token granted: {}", token);
+        LOG.debug("Token granted: {}", token);
         return token;
     }
 
