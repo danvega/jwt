@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>dev.danvega</groupId>
-    <artifactId>jwt</artifactId>
+    <artifactId>jwt-username-password</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>jwt</name>
-    <description>jwt</description>
+    <description>JWT with Username and Password Authentication</description>
     <properties>
         <java.version>17</java.version>
     </properties>
