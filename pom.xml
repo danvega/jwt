@@ -39,6 +39,12 @@
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
         </dependency>
+		<dependency>
+			<groupId>com.c4-soft.springaddons</groupId>
+			<artifactId>spring-addons-oauth2-test</artifactId>
+			<version>6.0.7</version>
+			<scope>test</scope>
+		</dependency>
     </dependencies>
 
     <build>
