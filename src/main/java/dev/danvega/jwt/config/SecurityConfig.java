@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -19,6 +21,7 @@ import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthen
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -48,14 +51,26 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		return http.csrf(csrf -> csrf.disable()).authorizeHttpRequests(auth -> auth.requestMatchers("/token").permitAll().anyRequest().authenticated())
+		return http.csrf(csrf -> csrf.disable()).authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
 				.exceptionHandling(
 						(ex) -> ex.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
 								.accessDeniedHandler(new BearerTokenAccessDeniedHandler()))
-				.httpBasic(Customizer.withDefaults()) //
 				.build();
+	}
+
+	@Order(Ordered.HIGHEST_PRECEDENCE)
+	@Bean
+	SecurityFilterChain tokenSecurityFilterChain(HttpSecurity http) throws Exception {
+		http.securityMatcher(new AntPathRequestMatcher("/token"));
+		http.authorizeHttpRequests().anyRequest().authenticated();
+		http.httpBasic(Customizer.withDefaults());
+		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+		http.csrf().disable();
+		http.exceptionHandling(
+				(ex) -> ex.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint()).accessDeniedHandler(new BearerTokenAccessDeniedHandler()));
+		return http.build();
 	}
 
 	@Bean
