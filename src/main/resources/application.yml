@@ -1,3 +1,19 @@
-rsa:
-  private-key: classpath:certs/private.pem
-  public-key: classpath:certs/public.pem
+server:
+  ssl:
+    enabled: false
+    
+com.c4-soft.springaddons.security:
+  issuers:
+    - location: https://localhost:8443/realms/master
+      authorities:
+        claims:
+        - realm_access.roles
+        - resource_access.spring-addons-public.roles
+        prefix: SCOPE_
+
+  cors:
+  - path: /**
+    allowed-methods:
+      - GET
+    allowed-origins:
+      - https://localhost:3000
