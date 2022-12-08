@@ -10,6 +10,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
@@ -33,6 +34,8 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 
+import static org.springframework.security.config.Customizer.*;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -51,7 +54,9 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		return http.csrf(csrf -> csrf.disable()).authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+		return http
+				.csrf(AbstractHttpConfigurer::disable)
+				.authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
 				.exceptionHandling(
@@ -60,17 +65,24 @@ public class SecurityConfig {
 				.build();
 	}
 
+	/*
+	 * This was added via PR (thanks to @ch4mpy)
+	 * This will allow the /token endpoint to use basic auth and everything else uses the SFC above
+	 */
 	@Order(Ordered.HIGHEST_PRECEDENCE)
 	@Bean
 	SecurityFilterChain tokenSecurityFilterChain(HttpSecurity http) throws Exception {
-		http.securityMatcher(new AntPathRequestMatcher("/token"));
-		http.authorizeHttpRequests().anyRequest().authenticated();
-		http.httpBasic(Customizer.withDefaults());
-		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-		http.csrf().disable();
-		http.exceptionHandling(
-				(ex) -> ex.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint()).accessDeniedHandler(new BearerTokenAccessDeniedHandler()));
-		return http.build();
+		return http
+				.requestMatcher(new AntPathRequestMatcher("/token"))
+				.authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.csrf(AbstractHttpConfigurer::disable)
+				.exceptionHandling(ex -> {
+					ex.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint());
+					ex.accessDeniedHandler(new BearerTokenAccessDeniedHandler());
+				})
+				.httpBasic(withDefaults())
+				.build();
 	}
 
 	@Bean
