@@ -62,6 +62,7 @@ public class SecurityConfig {
 				.exceptionHandling(
 						(ex) -> ex.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
 								.accessDeniedHandler(new BearerTokenAccessDeniedHandler()))
+				.httpBasic(withDefaults())
 				.build();
 	}
 
