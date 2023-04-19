@@ -73,7 +73,7 @@ public class SecurityConfig {
 	@Bean
 	SecurityFilterChain tokenSecurityFilterChain(HttpSecurity http) throws Exception {
 		return http
-				.requestMatcher(new AntPathRequestMatcher("/token"))
+				.securityMatcher(new AntPathRequestMatcher("/token"))
 				.authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.csrf(AbstractHttpConfigurer::disable)
